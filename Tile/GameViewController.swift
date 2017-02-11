@@ -1,35 +1,21 @@
-//
-//  GameViewController.swift
-//  Tile
-//
-//  Created by shindyu on 2017/02/11.
-//  Copyright © 2017年 shindyu.com. All rights reserved.
-//
-
 import UIKit
 import SpriteKit
 import GameplayKit
+import GameKit
 
-class GameViewController: UIViewController {
+class GameViewController: UIViewController, GKGameCenterControllerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            if let scene = SKScene(fileNamed: "GameScene") {
-                // Set the scale mode to scale to fit the window
-                scene.scaleMode = .aspectFill
-                
-                // Present the scene
-                view.presentScene(scene)
-            }
-            
-            view.ignoresSiblingOrder = true
-            
-            view.showsFPS = true
-            view.showsNodeCount = true
-        }
+        let scene = TitleScene(size: view.bounds.size)
+        let skView = view as! SKView
+        scene.scaleMode = .aspectFill
+        let transition = SKTransition.fade(withDuration: 0.2)
+        skView.presentScene(scene, transition: transition)
+    }
+
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+        gameCenterViewController.dismiss(animated: true, completion: nil)
     }
 
     override var shouldAutorotate: Bool {
@@ -50,6 +36,6 @@ class GameViewController: UIViewController {
     }
 
     override var prefersStatusBarHidden: Bool {
-        return true
+        return false
     }
 }
