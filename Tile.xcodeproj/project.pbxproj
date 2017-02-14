@@ -108,11 +108,11 @@
 				51A9B8611E4E0E070060F70D /* GameCenterUtility.swift */,
 				51A9B8631E4E0E350060F70D /* TitleScene.swift */,
 				51A9B8681E4ED4830060F70D /* GameScene.swift */,
-				51A9B8A01E4F3C1F0060F70D /* TileBoard.swift */,
 				51A9B8A21E4F653D0060F70D /* UIColor+Extension.swift */,
+				51A9B8A01E4F3C1F0060F70D /* TileBoard.swift */,
+				51A9B8A81E50B6910060F70D /* Player.swift */,
 				51A9B8A41E50B3990060F70D /* Enemy.swift */,
 				51A9B8A61E50B66C0060F70D /* Potion.swift */,
-				51A9B8A81E50B6910060F70D /* Player.swift */,
 				51A9B8AA1E50B6B00060F70D /* Coin.swift */,
 			);
 			path = Tile;

@@ -32,7 +32,7 @@ class TileBoard: SKNode {
     init(cubicCount: Int, length: CGFloat) {
         self.cubicCount = cubicCount
         let nodeWidth = length / CGFloat(cubicCount)
-        self.board = SKSpriteNode(color: .clear, size: CGSize(width: length, height: length))
+        self.board = SKSpriteNode(color: UIColor().flatGray, size: CGSize(width: length, height: length))
         self.baseTileArray = [:]
         self.nodeArray = [:]
 
@@ -40,7 +40,7 @@ class TileBoard: SKNode {
 
         for i in 0..<cubicCount {
             for j in 0..<cubicCount {
-                let node = SKShapeNode(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+                let node = SKShapeNode(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 1.0)
                 node.name = "\(i),\(j)"
                 node.strokeColor = .gray
                 node.lineWidth = 5.0
@@ -52,8 +52,8 @@ class TileBoard: SKNode {
                 let label = SKLabelNode(text: "\(i),\(j)")
                 label.fontColor = .gray
                 node.addChild(label)
-
                 board.addChild(node)
+
                 baseTileArray.updateValue(node, forKey: node.name!)
             }
         }
@@ -67,11 +67,12 @@ class TileBoard: SKNode {
         if let tile = baseTileArray["\(column),\(row)"] {
             node.position = tile.position
             node.name = tile.name
+            node.run(SKAction.scale(by: 0.1, duration: 0))
             board.addChild(node)
             nodeArray.updateValue(node, forKey: node.name!)
             let action = SKAction.sequence([
-                SKAction.scale(by: 0.5, duration: 0),
-                SKAction.scale(by: 2.0, duration: 0.2)
+                SKAction.wait(forDuration: 0.3),
+                SKAction.scale(by: 10.0, duration: 0.2)
                 ])
             node.run(action)
         }

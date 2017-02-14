@@ -24,4 +24,14 @@ extension UIColor {
             return UIColor.rgb(r: 255, g: 230, b: 10, alpha: 1.0)
         }
     }
+    var flatPurple: UIColor {
+        get {
+            return UIColor.rgb(r: 155, g: 89, b: 182, alpha: 1.0)
+        }
+    }
+    var flatGray: UIColor {
+        get {
+            return UIColor.rgb(r: 189, g: 195, b: 199, alpha: 1.0)
+        }
+    }
 }

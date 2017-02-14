@@ -9,7 +9,7 @@ class TitleScene: SKScene, SKPhysicsContactDelegate {
 
     // MARK: - methods
     override func didMove(to view: SKView) {
-        self.backgroundColor = SKColor.white
+        self.backgroundColor = .black
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
         self.physicsWorld.contactDelegate = self
 
