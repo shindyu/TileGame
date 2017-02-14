@@ -19,4 +19,9 @@ extension UIColor {
             return UIColor.rgb(r: 46, g: 204, b: 113, alpha: 1.0)
         }
     }
+    var flatYellow: UIColor {
+        get {
+            return UIColor.rgb(r: 255, g: 230, b: 10, alpha: 1.0)
+        }
+    }
 }

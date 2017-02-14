@@ -2,11 +2,15 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    let startButton = SKLabelNode()
-    let rankingButton = SKLabelNode()
-    var nodeArray: [SKSpriteNode] = []
+    let lifeLabel = SKLabelNode()
+    let coinLabel = SKLabelNode()
+    let expLabel = SKLabelNode()
     var tileBoard: TileBoard!
     var cubicCount: Int!
+    var expCount: Int = 0
+    var lifeCount: Int = 10
+    var coinCount: Int = 0
+    var messageLabel = SKLabelNode()
 
     // MARK: - methods
     override func didMove(to view: SKView) {
@@ -14,6 +18,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
         self.physicsWorld.contactDelegate = self
         setupSwipeControls()
+
+        expLabel.text = "\(expCount)"
+        expLabel.fontName = "Helvetica"
+        expLabel.fontColor = UIColor().flatBlue
+        expLabel.position = CGPoint(x: self.frame.midX / 2, y: self.frame.maxY - 100)
+        self.addChild(expLabel)
+
+        lifeLabel.text = "\(lifeCount)"
+        lifeLabel.fontName = "Helvetica"
+        lifeLabel.fontColor = UIColor().flatGreen
+        lifeLabel.position = CGPoint(x: self.frame.midX, y: self.frame.maxY - 100)
+        self.addChild(lifeLabel)
+
+        coinLabel.text = "\(coinCount)"
+        coinLabel.fontName = "Helvetica"
+        coinLabel.fontColor = UIColor().flatYellow
+        coinLabel.position = CGPoint(x: self.frame.midX * 3 / 2, y: self.frame.maxY - 100)
+        self.addChild(coinLabel)
+
+        messageLabel.text = ""
+        //arrayLabel.fontName = "Helvetica"
+        messageLabel.fontColor = UIColor().flatBlue
+        messageLabel.position = CGPoint(x: self.frame.midX, y: 100)
+        self.addChild(messageLabel)
 
         self.cubicCount = 4
 
@@ -24,15 +52,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         board.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
         self.addChild(board)
 
-        let node = SKShapeNode(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
-        //node.lineWidth = 20.0
-        node.strokeColor = .clear
-        node.fillColor = UIColor().flatRed
-        tileBoard.setNode(column: 1, row: 1, node: node.copy() as! SKShapeNode)
-        node.fillColor = UIColor().flatGreen
-        tileBoard.setNode(column: 2, row: 3, node: node.copy() as! SKShapeNode)
-        node.fillColor = UIColor().flatBlue
-        tileBoard.setNode(column: 2, row: 0, node: node.copy() as! SKShapeNode)
+        let player = Player(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+        tileBoard.setNode(column: 1, row: 1, node: player)
+
+        let enemy = Enemy(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+        tileBoard.setNode(column: 2, row: 3, node: enemy)
+
+        let coin = Coin(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+        tileBoard.setNode(column: 2, row: 0, node: coin)
+
+        printArrays()
     }
 
     func setupSwipeControls() {
@@ -58,45 +87,202 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     func swipedUp(_ r: UIGestureRecognizer!) {
-        tileBoard.moveNodesUp()
-        setNodeRandom()
+        let action = SKAction.run {
+            self.moveNodesUp()
+        }
+        self.run(action, completion: {
+            self.setNodeRandom()
+        })
     }
 
     func swipedDown(_ r: UIGestureRecognizer!) {
-        tileBoard.moveNodesDown()
-        setNodeRandom()
-    }
+        let action = SKAction.run {
+            self.moveNodesDown()
+        }
+        self.run(action, completion: {
+            self.setNodeRandom()
+        })    }
 
     func swipedLeft(_ r: UIGestureRecognizer!) {
-        tileBoard.moveNodesLeft()
-        setNodeRandom()
+        let action = SKAction.run {
+            self.moveNodesLeft()
+        }
+        self.run(action, completion: {
+            self.setNodeRandom()
+        })
     }
 
     func swipedRight(_ r: UIGestureRecognizer!) {
-        tileBoard.moveNodesRight()
-        setNodeRandom()
+        let action = SKAction.run {
+            self.moveNodesRight()
+        }
+        self.run(action, completion: {
+            self.setNodeRandom()
+        })
+    }
+
+    func moveNodesUp() {
+        for j in 2..<cubicCount+1 {
+            for i in 0..<cubicCount {
+                moving(key: "\(i),\(cubicCount - j)", direction: .up)
+            }
+        }
+    }
+
+    func moveNodesDown() {
+        for j in 1..<cubicCount {
+            for i in 0..<cubicCount {
+                moving(key: "\(i),\(j)", direction: .down)
+            }
+        }
+    }
+
+    func moveNodesLeft() {
+        for i in 1..<cubicCount {
+            for j in 0..<cubicCount {
+                moving(key: "\(i),\(j)", direction: .left)
+            }
+        }
+    }
+
+
+    func moveNodesRight() {
+        for i in 2..<cubicCount+1 {
+            for j in 0..<cubicCount {
+                moving(key: "\(cubicCount - i),\(j)", direction: .right)
+            }
+        }
+    }
+
+    func moving(key: String, direction: MovingDirection) {
+        // nodeの存在確認
+        guard let node = tileBoard.nodeArray[key] else { return }
+        // 移動先がboardの領域内に存在することを確認
+        let nextKey = direction.nextKey(key: key)
+        guard let nextTile = tileBoard.baseTileArray[nextKey] else { return }
+        // 移動先にnodeが存在しないとき
+        guard let existingNode = tileBoard.nodeArray[nextKey] else {
+            let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
+            node.run(moveAction)
+            tileBoard.nodeArray.removeValue(forKey: key)
+            tileBoard.nodeArray.updateValue(node, forKey: nextKey)
+
+            moving(key: nextKey, direction: direction)
+
+            return
+        }
+        // 移動先のnodeが同じ種類のnodeのとき
+        if type(of: existingNode) == type(of: node) {
+            let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
+            node.run(moveAction)
+            existingNode.removeFromParent()
+            tileBoard.nodeArray.removeValue(forKey: key)
+            tileBoard.nodeArray.updateValue(node, forKey: nextKey)
+
+            node.run(SKAction.sequence([
+                SKAction.scale(by: 1.25, duration: 0.1),
+                SKAction.scale(by: 0.8, duration: 0.2)
+                ]))
+        } else {
+            if type(of: node) == Player.self {
+                messageLabel.text = ("player action")
+                switch existingNode {
+                case is Enemy:
+                    messageLabel.text = ("hit enemy")
+                    expCount += 1
+                    expLabel.text = "\(expCount)"
+                    let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
+                    node.run(moveAction)
+                    existingNode.removeFromParent()
+                    tileBoard.nodeArray.removeValue(forKey: key)
+                    tileBoard.nodeArray.updateValue(node, forKey: nextKey)
+
+                    node.run(SKAction.sequence([
+                        SKAction.scale(by: 1.25, duration: 0.1),
+                        SKAction.scale(by: 0.8, duration: 0.2)
+                        ]))
+                    return
+                case is Potion:
+                    messageLabel.text = ("get potion")
+                    lifeCount += 1
+                    lifeLabel.text = "\(lifeCount)"
+                    let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
+                    node.run(moveAction)
+                    existingNode.removeFromParent()
+                    tileBoard.nodeArray.removeValue(forKey: key)
+                    tileBoard.nodeArray.updateValue(node, forKey: nextKey)
+
+                    node.run(SKAction.sequence([
+                        SKAction.scale(by: 1.25, duration: 0.1),
+                        SKAction.scale(by: 0.8, duration: 0.2)
+                        ]))
+                    return
+                case is Coin:
+                    messageLabel.text = ("get coin")
+                    coinCount += 1
+                    coinLabel.text = "\(coinCount)"
+                    let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
+                    node.run(moveAction)
+                    existingNode.removeFromParent()
+                    tileBoard.nodeArray.removeValue(forKey: key)
+                    tileBoard.nodeArray.updateValue(node, forKey: nextKey)
+
+                    node.run(SKAction.sequence([
+                        SKAction.scale(by: 1.25, duration: 0.1),
+                        SKAction.scale(by: 0.8, duration: 0.2)
+                        ]))
+                    return
+                default:
+                    return
+                }
+            }
+            if type(of: node) == Enemy.self {
+                if existingNode is Player {
+                    messageLabel.text = ("damage")
+                    lifeCount -= 1
+                    lifeLabel.text = "\(lifeCount)"
+                }
+            }
+        }
     }
 
     func setNodeRandom() {
-        let colorNumber = (Int)(arc4random_uniform(UInt32(4)))
-        for i in 0..<cubicCount*cubicCount {
-            let columnNumber = (Int)(arc4random_uniform(UInt32(4)))
+        let tileSpecies = (Int)(arc4random_uniform(UInt32(6)))
+        while(true) {
+            let columnNumber = (Int)(arc4random_uniform(UInt32(3)))
             let rowNumber = (Int)(arc4random_uniform(UInt32(4)))
             let key = "\(columnNumber),\(rowNumber)"
+
             guard let _ = tileBoard.nodeArray[key] else {
                 let nodeWidth = (self.frame.width - 40) / CGFloat(cubicCount)
-                let node = SKShapeNode(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
-                node.lineWidth = 20.0
-                node.strokeColor = .clear
-                node.fillColor = UIColor().flatRed
-                if colorNumber == 0 { node.fillColor = UIColor().flatRed }
-                else if colorNumber == 1 { node.fillColor = UIColor().flatGreen }
-                else if colorNumber == 2 { node.fillColor = UIColor().flatBlue }
-
-                tileBoard.setNode(column: columnNumber, row: rowNumber, node: node)
+                
+                if tileSpecies == 0 || tileSpecies == 1 || tileSpecies == 2 {
+                    let enemy = Enemy(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+                    tileBoard.setNode(column: columnNumber, row: rowNumber, node: enemy)
+                } else if tileSpecies == 3 {
+                    let potion = Potion(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+                    tileBoard.setNode(column: columnNumber, row: rowNumber, node: potion)
+                } else if tileSpecies == 4 || tileSpecies == 5 {
+                    let coin = Coin(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
+                    tileBoard.setNode(column: columnNumber, row: rowNumber, node: coin)
+                }
                 return
             }
         }
+    }
+
+    func printArrays() {
+        var nameString = ""
+        for i in 0..<cubicCount {
+            for j in 0..<cubicCount {
+                if let node = tileBoard.nodeArray["\(i),\(j)"],
+                    let name = node.name {
+                    nameString += "\(name):"
+                }
+            }
+            nameString += "\n"
+        }
+        messageLabel.text = nameString
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

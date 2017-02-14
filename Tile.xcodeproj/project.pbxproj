@@ -19,6 +19,10 @@
 		51A9B8691E4ED4830060F70D /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8681E4ED4830060F70D /* GameScene.swift */; };
 		51A9B8A11E4F3C1F0060F70D /* TileBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A01E4F3C1F0060F70D /* TileBoard.swift */; };
 		51A9B8A31E4F653D0060F70D /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A21E4F653D0060F70D /* UIColor+Extension.swift */; };
+		51A9B8A51E50B3990060F70D /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A41E50B3990060F70D /* Enemy.swift */; };
+		51A9B8A71E50B66C0060F70D /* Potion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A61E50B66C0060F70D /* Potion.swift */; };
+		51A9B8A91E50B6910060F70D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A81E50B6910060F70D /* Player.swift */; };
+		51A9B8AB1E50B6B00060F70D /* Coin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8AA1E50B6B00060F70D /* Coin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +52,10 @@
 		51A9B8681E4ED4830060F70D /* GameScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		51A9B8A01E4F3C1F0060F70D /* TileBoard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TileBoard.swift; sourceTree = "<group>"; };
 		51A9B8A21E4F653D0060F70D /* UIColor+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Extension.swift"; sourceTree = "<group>"; };
+		51A9B8A41E50B3990060F70D /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
+		51A9B8A61E50B66C0060F70D /* Potion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Potion.swift; sourceTree = "<group>"; };
+		51A9B8A81E50B6910060F70D /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		51A9B8AA1E50B6B00060F70D /* Coin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +110,10 @@
 				51A9B8681E4ED4830060F70D /* GameScene.swift */,
 				51A9B8A01E4F3C1F0060F70D /* TileBoard.swift */,
 				51A9B8A21E4F653D0060F70D /* UIColor+Extension.swift */,
+				51A9B8A41E50B3990060F70D /* Enemy.swift */,
+				51A9B8A61E50B66C0060F70D /* Potion.swift */,
+				51A9B8A81E50B6910060F70D /* Player.swift */,
+				51A9B8AA1E50B6B00060F70D /* Coin.swift */,
 			);
 			path = Tile;
 			sourceTree = "<group>";
@@ -233,12 +245,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51A9B8A51E50B3990060F70D /* Enemy.swift in Sources */,
 				51A9B8A31E4F653D0060F70D /* UIColor+Extension.swift in Sources */,
 				51A9B8691E4ED4830060F70D /* GameScene.swift in Sources */,
+				51A9B8A71E50B66C0060F70D /* Potion.swift in Sources */,
 				51A9B8621E4E0E070060F70D /* GameCenterUtility.swift in Sources */,
 				51A9B8441E4E0DD50060F70D /* GameViewController.swift in Sources */,
 				51A9B83C1E4E0DD50060F70D /* AppDelegate.swift in Sources */,
 				51A9B8A11E4F3C1F0060F70D /* TileBoard.swift in Sources */,
+				51A9B8A91E50B6910060F70D /* Player.swift in Sources */,
+				51A9B8AB1E50B6B00060F70D /* Coin.swift in Sources */,
 				51A9B8641E4E0E350060F70D /* TitleScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

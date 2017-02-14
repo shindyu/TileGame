@@ -23,7 +23,7 @@ enum MovingDirection {
     }
 }
 
-class TileBoard {
+class TileBoard: SKNode {
     var board: SKSpriteNode
     var baseTileArray: [String:SKShapeNode]
     var nodeArray: [String:SKShapeNode]
@@ -35,6 +35,9 @@ class TileBoard {
         self.board = SKSpriteNode(color: .clear, size: CGSize(width: length, height: length))
         self.baseTileArray = [:]
         self.nodeArray = [:]
+
+        super.init()
+
         for i in 0..<cubicCount {
             for j in 0..<cubicCount {
                 let node = SKShapeNode(rectOf: CGSize(width: nodeWidth, height: nodeWidth), cornerRadius: 10.0)
@@ -55,6 +58,10 @@ class TileBoard {
             }
         }
     }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     func setNode(column: Int, row: Int, node: SKShapeNode) {
         if let tile = baseTileArray["\(column),\(row)"] {
@@ -73,64 +80,5 @@ class TileBoard {
 
     func getTile(column: Int, row: Int) -> SKSpriteNode? {
         return nil
-    }
-
-    func moveNodesUp() {
-        for j in 1..<cubicCount+1 {
-            for i in 0..<cubicCount {
-                moving(key: "\(i),\(cubicCount - j)", direction: .up)
-            }
-        }
-    }
-
-    func moveNodesDown() {
-        for j in 0..<cubicCount {
-            for i in 0..<cubicCount {
-                moving(key: "\(i),\(j)", direction: .down)
-            }
-        }
-    }
-
-    func moveNodesLeft() {
-        for i in 0..<cubicCount {
-            for j in 0..<cubicCount {
-                moving(key: "\(i),\(j)", direction: .left)
-            }
-        }
-    }
-
-
-    func moveNodesRight() {
-        for i in 1..<cubicCount+1 {
-            for j in 0..<cubicCount {
-                moving(key: "\(cubicCount - i),\(j)", direction: .right)
-            }
-        }
-    }
-
-    func moving(key: String, direction: MovingDirection) {
-        // nodeの存在確認
-        guard let node = nodeArray[key] else { return }
-        // 移動先がboardの領域内に存在することを確認
-        let nextKey = direction.nextKey(key: key)
-        guard let nextTile = baseTileArray[nextKey] else { return }
-        // 移動先にnodeが存在しないとき
-        guard let existingNode = nodeArray[nextKey] else {
-            let moveAction = SKAction.move(to: nextTile.position, duration: 0.1)
-            node.run(moveAction)
-            nodeArray.updateValue(node, forKey: nextKey)
-            nodeArray.removeValue(forKey: key)
-
-            moving(key: nextKey, direction: direction)
-
-            return
-        }
-        // 移動先のnodeが同じ種類のnodeのとき
-        if existingNode.fillColor == node.fillColor {
-            let moveAction = SKAction.move(to: nextTile.position, duration: 0.1)
-            node.run(moveAction)
-            nodeArray.removeValue(forKey: key)
-            node.removeFromParent()
-        }
     }
 }
