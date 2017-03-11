@@ -24,7 +24,7 @@ class Coin: SKShapeNode {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func updateStatus(level: Int) {
+    func update(level: Int) {
         self.level = level
         updateLabel()
     }

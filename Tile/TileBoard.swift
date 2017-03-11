@@ -1,6 +1,6 @@
 import SpriteKit
 
-enum MovingDirection {
+enum MoveDirection {
     case up
     case down
     case left

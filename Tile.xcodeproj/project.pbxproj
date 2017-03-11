@@ -23,6 +23,7 @@
 		51A9B8A71E50B66C0060F70D /* Potion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A61E50B66C0060F70D /* Potion.swift */; };
 		51A9B8A91E50B6910060F70D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8A81E50B6910060F70D /* Player.swift */; };
 		51A9B8AB1E50B6B00060F70D /* Coin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9B8AA1E50B6B00060F70D /* Coin.swift */; };
+		51B2BD171E550D0B002E7C4F /* TurnScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B2BD161E550D0B002E7C4F /* TurnScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		51A9B8A61E50B66C0060F70D /* Potion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Potion.swift; sourceTree = "<group>"; };
 		51A9B8A81E50B6910060F70D /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		51A9B8AA1E50B6B00060F70D /* Coin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coin.swift; sourceTree = "<group>"; };
+		51B2BD161E550D0B002E7C4F /* TurnScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TurnScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				51A9B8A41E50B3990060F70D /* Enemy.swift */,
 				51A9B8A61E50B66C0060F70D /* Potion.swift */,
 				51A9B8AA1E50B6B00060F70D /* Coin.swift */,
+				51B2BD161E550D0B002E7C4F /* TurnScene.swift */,
 			);
 			path = Tile;
 			sourceTree = "<group>";
@@ -250,6 +253,7 @@
 				51A9B8691E4ED4830060F70D /* GameScene.swift in Sources */,
 				51A9B8A71E50B66C0060F70D /* Potion.swift in Sources */,
 				51A9B8621E4E0E070060F70D /* GameCenterUtility.swift in Sources */,
+				51B2BD171E550D0B002E7C4F /* TurnScene.swift in Sources */,
 				51A9B8441E4E0DD50060F70D /* GameViewController.swift in Sources */,
 				51A9B83C1E4E0DD50060F70D /* AppDelegate.swift in Sources */,
 				51A9B8A11E4F3C1F0060F70D /* TileBoard.swift in Sources */,

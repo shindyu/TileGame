@@ -1,7 +1,7 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class TurnScene: SKScene, SKPhysicsContactDelegate {
     let expLabel = SKLabelNode()
     let coinLabel = SKLabelNode()
     let shopLabel = SKLabelNode()
@@ -16,6 +16,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var turnCount: Int = 1
     var isGameOver: Bool = false
     var player: Player!
+    var lastMoveDirection: MoveDirection!
 
     // MARK: - methods
     override func didMove(to view: SKView) {
@@ -94,19 +95,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.moveNodesUp()
         }
         self.run(action, completion: {
+            self.actionPlayer()
+            self.actionEnemy()
             self.insertTile()
             self.updateGameScore()
         })
     }
 
     func swipedDown(_ r: UIGestureRecognizer!) {
-        let action = SKAction.run {
-            self.moveNodesDown()
-        }
-        self.run(action, completion: {
-            self.insertTile()
+        self.run(SKAction.sequence([
+            SKAction.run { self.moveNodesDown() },
+            SKAction.run { self.actionPlayer() },
+            SKAction.run { self.actionEnemy() },
+            SKAction.run { self.insertTile() }])
+            , completion: {
             self.updateGameScore()
-        })
+            }
+        )
+
+//        self.run(action, completion: {
+//            self.actionPlayer()
+//            self.actionEnemy()
+//            self.insertTile()
+//        })
     }
 
     func swipedLeft(_ r: UIGestureRecognizer!) {
@@ -114,6 +125,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.moveNodesLeft()
         }
         self.run(action, completion: {
+            self.actionPlayer()
+            self.actionEnemy()
             self.insertTile()
             self.updateGameScore()
         })
@@ -124,6 +137,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.moveNodesRight()
         }
         self.run(action, completion: {
+            self.actionPlayer()
+            self.actionEnemy()
             self.insertTile()
             self.updateGameScore()
         })
@@ -132,7 +147,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func moveNodesUp() {
         for j in 2..<cubicCount+1 {
             for i in 0..<cubicCount {
-                moving(key: "\(i),\(cubicCount - j)", direction: .up)
+                moveTile(key: "\(i),\(cubicCount - j)", direction: .up)
             }
         }
     }
@@ -140,7 +155,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func moveNodesDown() {
         for j in 1..<cubicCount {
             for i in 0..<cubicCount {
-                moving(key: "\(i),\(j)", direction: .down)
+                moveTile(key: "\(i),\(j)", direction: .down)
             }
         }
     }
@@ -148,7 +163,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func moveNodesLeft() {
         for i in 1..<cubicCount {
             for j in 0..<cubicCount {
-                moving(key: "\(i),\(j)", direction: .left)
+                moveTile(key: "\(i),\(j)", direction: .left)
             }
         }
     }
@@ -157,12 +172,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func moveNodesRight() {
         for i in 2..<cubicCount+1 {
             for j in 0..<cubicCount {
-                moving(key: "\(cubicCount - i),\(j)", direction: .right)
+                moveTile(key: "\(cubicCount - i),\(j)", direction: .right)
             }
         }
     }
 
-    func moving(key: String, direction: MoveDirection) {
+    func moveTile(key: String, direction: MoveDirection) {
+        lastMoveDirection = direction
+
         // nodeの存在確認
         guard let node = tileBoard.nodeArray[key] else { return }
         // 移動先がboardの領域内に存在することを確認
@@ -175,153 +192,126 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             tileBoard.nodeArray.removeValue(forKey: key)
             tileBoard.nodeArray.updateValue(node, forKey: nextKey)
 
-            moving(key: nextKey, direction: direction)
+            moveTile(key: nextKey, direction: direction)
 
             return
         }
         // 移動先のnodeが同じ種類のnodeのとき
         if type(of: existingNode) == type(of: node) {
-            if type(of: node) == Potion.self {
-                return
-            }
 
+
+            if let enemy = node as? Enemy, let exEnemy = existingNode as? Enemy {
+                if enemy.level != exEnemy.level {
+                    return
+                }
+                enemy.setStatus(level: enemy.level + exEnemy.level)
+                tileBoard.nodeArray.removeValue(forKey: key)
+                tileBoard.nodeArray.updateValue(enemy, forKey: nextKey)
+            }
             node.run(SKAction.sequence([
                 SKAction.move(to: nextTile.position, duration: 0.2),
                 SKAction.scale(by: 1.25, duration: 0.1),
                 SKAction.scale(by: 0.8, duration: 0.2)
-                ]))
-
-            existingNode.removeFromParent()
-            tileBoard.nodeArray.removeValue(forKey: key)
-            if let enemy = node as? Enemy, let exEnemy = existingNode as? Enemy {
-                if enemy.level == exEnemy.level {
-                    enemy.setStatus(level: enemy.level + exEnemy.level)
-                    tileBoard.nodeArray.updateValue(enemy, forKey: nextKey)
-                }
-            }
-            if let coin = node as? Coin, let exCoin = existingNode as? Coin {
-                coin.update(level: coin.level + exCoin.level)
-                tileBoard.nodeArray.updateValue(coin, forKey: nextKey)
-            }
-
-            return
-        }
-        if let player = node as? Player {
-            messageLabel.text = ("player action")
-            if let enemy = existingNode as? Enemy {
-                messageLabel.text = ("hit enemy")
-                let prevTitle = tileBoard.baseTileArray[key]
-                self.run(SKAction.sequence([
-                    SKAction.run {
-                        player.run(SKAction.move(to: nextTile.position, duration: 0.1))
-                    },
-                    SKAction.run {
-                        enemy.fillColor = UIColor().flatPurple
-                    },
-                    SKAction.run {
-                        player.run(SKAction.move(to: (prevTitle?.position)!, duration: 0.1))
-                    },
-                    SKAction.wait(forDuration: 0.1),
-                    SKAction.run {
-                        enemy.fillColor = .clear
-                        enemy.damage(point: player.attack)
-                        self.tileBoard.nodeArray.updateValue(enemy, forKey: nextKey)
-
-                        if enemy.life <= 0 {
-                            self.expCount += 1
-                            //self.expLabel.text = "⚔️\(self.expCount)"
-                            enemy.removeFromParent()
-                            self.tileBoard.nodeArray.removeValue(forKey: nextKey)
-                        }
-                    },
-                    ]))
-                return
-            }
-            if let potion = existingNode as? Potion {
-                messageLabel.text = ("get potion")
-                player.update(life: potion.level)
-
-                let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
-                node.run(moveAction)
-                potion.removeFromParent()
-                tileBoard.nodeArray.removeValue(forKey: key)
-                tileBoard.nodeArray.updateValue(node, forKey: nextKey)
-
-                node.run(SKAction.sequence([
-                    SKAction.scale(by: 1.25, duration: 0.1),
-                    SKAction.scale(by: 0.8, duration: 0.2)
-                    ]))
-                return
-            }
-            if let coin = existingNode as? Coin {
-                messageLabel.text = ("get coin")
-
-                coinCount += coin.level
-                //coinLabel.text = "💰\(coinCount)"
-
-                let moveAction = SKAction.move(to: nextTile.position, duration: 0.2)
-                node.run(moveAction)
-                coin.removeFromParent()
-                tileBoard.nodeArray.removeValue(forKey: key)
-                tileBoard.nodeArray.updateValue(node, forKey: nextKey)
-
-                node.run(SKAction.sequence([
-                    SKAction.scale(by: 1.25, duration: 0.1),
-                    SKAction.scale(by: 0.8, duration: 0.2)
-                    ]))
-                return
-            }
-        }
-        if let enemy = node as? Enemy {
-            if let player = existingNode as? Player {
-                messageLabel.text = ("damage")
-
-                player.update(life: -enemy.attack)
-                let prevTitle = tileBoard.baseTileArray[key]
-                self.run(SKAction.sequence([
-                    SKAction.run {
-                        enemy.run(SKAction.move(to: nextTile.position, duration: 0.1))
-                    },
-                    SKAction.run {
-                        player.fillColor = UIColor().flatRed
-                    },
-                    SKAction.run {
-                        enemy.run(SKAction.move(to: (prevTitle?.position)!, duration: 0.1))
-                    },
-                    SKAction.wait(forDuration: 0.1),
-                    SKAction.run {
-                        player.fillColor = .clear
-                    },
-                    ]))
-
-                if player.life <= 0 {
-                    let fade =
-                        SKAction.sequence([
-                            SKAction.hide(),
-                            SKAction.wait(forDuration: 0.3),
-                            SKAction.unhide(),
-                            SKAction.wait(forDuration: 0.3),
-                            SKAction.hide(),
-                            SKAction.wait(forDuration: 0.3),
-                            SKAction.unhide(),
-                            SKAction.wait(forDuration: 0.3),
-                            SKAction.hide(),
-                            SKAction.wait(forDuration: 0.3),
-                            SKAction.unhide(),
-                            SKAction.wait(forDuration: 0.3),
-                            SKAction.hide(),
-                            ])
-                    
-                    player.run(fade)
-                    endGame()
-                }
-            }
+                ]), completion: {
+                    existingNode.removeFromParent()
+            })
             return
         }
     }
 
+    func actionPlayer() {
+        for tile in tileBoard.nodeArray {
+            guard let player = tile.value as? Player else { continue }
+
+            let nextKey = lastMoveDirection.nextKey(key: tile.key)
+            guard let enemy = tileBoard.nodeArray[nextKey] as? Enemy else { continue }
+
+            messageLabel.text = ("hit enemy")
+
+            let prevTile = tileBoard.baseTileArray[tile.key]
+            self.run(SKAction.sequence([
+                SKAction.wait(forDuration: 0.2),
+                SKAction.run {
+                    player.run(SKAction.move(to: enemy.position, duration: 0.1))
+                },
+                SKAction.run {
+                    enemy.fillColor = UIColor().flatPurple
+                },
+                SKAction.run {
+                    player.run(SKAction.move(to: (prevTile?.position)!, duration: 0.1))
+                },
+                SKAction.wait(forDuration: 0.1),
+                SKAction.run {
+                    enemy.fillColor = .clear
+                    enemy.damage(point: player.attack)
+                    self.tileBoard.nodeArray.updateValue(enemy, forKey: nextKey)
+
+                    if enemy.life <= 0 {
+                        self.expCount += 1
+                        enemy.removeFromParent()
+                        self.tileBoard.nodeArray.removeValue(forKey: nextKey)
+                    }
+                },
+            ]))
+        }
+    }
+
+    func actionEnemy() {
+        for tile in tileBoard.nodeArray {
+            guard let enemy = tile.value as? Enemy else { continue }
+
+            let nextKey = lastMoveDirection.nextKey(key: tile.key)
+            guard let player = tileBoard.nodeArray[nextKey] as? Player else { continue }
+
+            messageLabel.text = ("hit enemy")
+
+            let prevTile = tileBoard.baseTileArray[tile.key]
+            self.run(SKAction.sequence([
+                SKAction.wait(forDuration: 0.2),
+                SKAction.run {
+                    enemy.run(SKAction.move(to: player.position, duration: 0.1))
+                },
+                SKAction.run {
+                    player.fillColor = UIColor().flatPurple
+                },
+                SKAction.run {
+                    enemy.run(SKAction.move(to: (prevTile?.position)!, duration: 0.1))
+                },
+                SKAction.wait(forDuration: 0.1),
+                SKAction.run {
+                    player.fillColor = .clear
+                    player.damage(point: enemy.attack)
+                    self.tileBoard.nodeArray.updateValue(player, forKey: nextKey)
+
+                    if player.life <= 0 {
+                        let fade =
+                            SKAction.sequence([
+                                SKAction.hide(),
+                                SKAction.wait(forDuration: 0.3),
+                                SKAction.unhide(),
+                                SKAction.wait(forDuration: 0.3),
+                                SKAction.hide(),
+                                SKAction.wait(forDuration: 0.3),
+                                SKAction.unhide(),
+                                SKAction.wait(forDuration: 0.3),
+                                SKAction.hide(),
+                                SKAction.wait(forDuration: 0.3),
+                                SKAction.unhide(),
+                                SKAction.wait(forDuration: 0.3),
+                                SKAction.hide(),
+                                ])
+
+                        player.run(fade)
+                        self.tileBoard.nodeArray.removeValue(forKey: nextKey)
+                        self.endGame()
+                    }
+                },
+                ]))
+        }
+    }
+
     func insertTile() {
-        let tileType = (Int)(arc4random_uniform(UInt32(10)))
+        let tileType = (Int)(arc4random_uniform(UInt32(5)))
         while(tileBoard.nodeArray.count != tileBoard.baseTileArray.count) {
             let columnNumber = (Int)(arc4random_uniform(UInt32(4)))
             let rowNumber = (Int)(arc4random_uniform(UInt32(4)))
@@ -333,19 +323,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     let enemy = Enemy(rectOf: tileSize, cornerRadius: 10.0)
                     enemy.setStatus(level: gameLevel)
                     tileBoard.setNode(column: columnNumber, row: rowNumber, node: enemy)
-                case 6...8:
-                    let coin = Coin(rectOf: tileSize, cornerRadius: 10.0)
-                    tileBoard.setNode(column: columnNumber, row: rowNumber, node: coin)
-                case 9:
-                    let potionLevel = (Int)(arc4random_uniform(UInt32(10)))
-                    let potion = Potion(rectOf: tileSize, cornerRadius: 10.0)
-                    switch potionLevel {
-                    case 0:
-                        potion.update(level: 3)
-                        tileBoard.setNode(column: columnNumber, row: rowNumber, node: potion)
-                    default:
-                        break
-                    }
                 default:
                     break
                 }
@@ -375,7 +352,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             "Turn : \(turnCount)\n" +
             "Kills : \(expCount)\n" +
             "Coins : \(coinCount)\n" +
-            "Total : \(turnCount+expCount+coinCount)"
+        "Total : \(turnCount+expCount+coinCount)"
         label.layer.zPosition = 10
         label.layer.position = (scene?.view!.center)!
         self.view?.addSubview(label)
@@ -412,10 +389,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         if self.isGameOver {
-            let scene = GameScene(size: self.size)
+            let scene = TurnScene(size: self.size)
             scene.scaleMode = .aspectFill
             self.view!.presentScene(scene)
         }
     }
-
 }

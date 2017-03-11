@@ -29,7 +29,8 @@ class TitleScene: SKScene, SKPhysicsContactDelegate {
         let touchedNode = scene?.atPoint(pos)
         if (touchedNode?.name == "start") {
             self.removeAllChildren()
-            let scene = GameScene(size: self.size)
+            //let scene = GameScene(size: self.size)
+            let scene = TurnScene(size: self.size)
             scene.scaleMode = .aspectFill
             self.view!.presentScene(scene)
         } else if (touchedNode?.name == "ranking") {
